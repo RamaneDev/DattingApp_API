@@ -29,6 +29,7 @@ namespace DattingApp.API
         {
             services.AddControllers();
             services.AddDbContext<DataContext>(x => x.UseSqlite(this.Configuration.GetConnectionString("DefaultConnectionString")));
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,10 +46,13 @@ namespace DattingApp.API
 
             app.UseAuthorization();
 
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-            });
+            });           
+
         }
     }
 }
