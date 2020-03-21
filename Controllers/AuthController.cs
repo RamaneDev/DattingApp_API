@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using DattingApp.API.Data;
+using DattingApp.API.Dtos;
 using DattingApp.API.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,19 +17,20 @@ namespace DattingApp.API.Controllers
         }
         private IAuthRepository _repo { get; set; }
 
-        public async Task<IActionResult> Register(string username, string password)
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(UserToRegisterDto userToRegisterDto)
         {
-            username = username.ToLower();
+            userToRegisterDto.Username = userToRegisterDto.Username.ToLower();
 
-            if(await _repo.UserExists(username))
+            if(await _repo.UserExists(userToRegisterDto.Username))
                return BadRequest("Username already exists");
 
             var userToCreate = new User()
             {
-              Username = username              
+              Username = userToRegisterDto.Username              
             };
 
-            var user = await _repo.Register(userToCreate, password);
+            var user = await _repo.Register(userToCreate, userToRegisterDto.Password);
 
             return StatusCode(201);                     
 
