@@ -36,6 +36,23 @@ namespace DattingApp.API.Controllers
 
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> Login(UserToLoginDto userToLoginDto)
+        {
+           var userFromRepo = await _repo.Login(userToLoginDto.Username, userToLoginDto.Password);
+
+           if(userFromRepo == null)
+            return Unauthorized();
+
+           // build Token for Client
+            
+
+           
+
+            return StatusCode(201);                     
+
+        }
+
 
 
 
