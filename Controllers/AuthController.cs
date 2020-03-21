@@ -1,8 +1,14 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using DattingApp.API.Data;
 using DattingApp.API.Dtos;
 using DattingApp.API.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace DattingApp.API.Controllers
 {
@@ -10,12 +16,13 @@ namespace DattingApp.API.Controllers
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        public AuthController(IAuthRepository repo)
+        public AuthController(IAuthRepository repo, IConfiguration config)
         {
-            this._repo = repo;
-
+            _repo = repo;
+            _config = config;
         }
-        private IAuthRepository _repo { get; set; }
+        private readonly IAuthRepository _repo ;
+        private readonly IConfiguration _config ;
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserToRegisterDto userToRegisterDto)
@@ -39,17 +46,38 @@ namespace DattingApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserToLoginDto userToLoginDto)
         {
-           var userFromRepo = await _repo.Login(userToLoginDto.Username, userToLoginDto.Password);
+           var userFromRepo = await _repo.Login(userToLoginDto.Username.ToLower(), userToLoginDto.Password);
 
            if(userFromRepo == null)
             return Unauthorized();
 
            // build Token for Client
-            
 
+           var claims = new[]
+           {
+               new Claim(ClaimTypes.NameIdentifier, userFromRepo.Id.ToString()),
+               new Claim(ClaimTypes.Name, userFromRepo.Username)
+           };
+
+           var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+
+           var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+           var tokenDescriptor = new SecurityTokenDescriptor()
+           {
+               Subject = new ClaimsIdentity(claims),
+               Expires = DateTime.Now.AddDays(1),
+               SigningCredentials = creds
+           };
+
+           var tokenHandler = new JwtSecurityTokenHandler();
+
+           var token = tokenHandler.CreateToken(tokenDescriptor);
            
 
-            return StatusCode(201);                     
+            return Ok(new {
+                token = tokenHandler.WriteToken(token)
+            });                     
 
         }
 
