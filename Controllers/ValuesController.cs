@@ -1,10 +1,12 @@
 using System.Threading.Tasks;
 using DattingApp.API.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DattingApp.API.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class ValuesController : ControllerBase
@@ -22,6 +24,14 @@ namespace DattingApp.API.Controllers
         public async Task<IActionResult> GetValues()
         {
             var values = await _context.Values.ToListAsync();
+
+            return Ok(values);
+        }
+        [AllowAnonymous]
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetValues(int id)
+        {
+            var values = await _context.Values.FirstOrDefaultAsync(x => x.Id == id);
 
             return Ok(values);
         }

@@ -10,10 +10,10 @@ namespace DattingApp.API.Data
     {
         public AuthRepository(DataContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
-        private DataContext _context { get; set; }
+        private readonly DataContext _context;
 
         public async Task<User> Login(string username, string password)
         {
