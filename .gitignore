@@ -3,3 +3,4 @@ dating.*
 /obj
 .vs
 .git
+appsettings.json
