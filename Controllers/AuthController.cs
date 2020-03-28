@@ -27,6 +27,8 @@ namespace DattingApp.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserToRegisterDto userToRegisterDto)
         {
+            throw new Exception("register exception");
+            
             userToRegisterDto.Username = userToRegisterDto.Username.ToLower();
 
             if(await _repo.UserExists(userToRegisterDto.Username))
