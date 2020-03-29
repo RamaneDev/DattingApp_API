@@ -26,8 +26,7 @@ namespace DattingApp.API.Controllers
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(UserToRegisterDto userToRegisterDto)
-        {
-            throw new Exception("register exception");
+        {            
             
             userToRegisterDto.Username = userToRegisterDto.Username.ToLower();
 
@@ -82,11 +81,5 @@ namespace DattingApp.API.Controllers
             });                     
 
         }
-
-
-
-
-
-
     }
 }
