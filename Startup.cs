@@ -18,6 +18,7 @@ using System.Net;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using DattingApp.API.Helpers;
+using AutoMapper;
 
 namespace DattingApp.API
 {
@@ -38,6 +39,7 @@ namespace DattingApp.API
             );
             services.AddDbContext<DataContext>(x => x.UseSqlite(this.Configuration.GetConnectionString("DefaultConnectionString")));
             services.AddCors();
+            services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddScoped<IAuthRepository,AuthRepository>();
             services.AddScoped<IDatingRepository,DatingRepository>();
             services.AddMvc(option => option.EnableEndpointRouting = false);
