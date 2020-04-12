@@ -39,6 +39,7 @@ namespace DattingApp.API
             );
             services.AddDbContext<DataContext>(x => x.UseSqlite(this.Configuration.GetConnectionString("DefaultConnectionString")));
             services.AddCors();
+            services.Configure<CloudinaryOptions>(Configuration.GetSection("CloudinaryOptions"));
             services.AddAutoMapper(typeof(DatingRepository).Assembly);
             services.AddScoped<IAuthRepository,AuthRepository>();
             services.AddScoped<IDatingRepository,DatingRepository>();
