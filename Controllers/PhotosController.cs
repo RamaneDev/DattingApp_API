@@ -92,6 +92,34 @@ namespace DattingApp.API.Controllers
 
         }
 
+        [HttpPost("{id}/setMain")]
+        public async Task<IActionResult> setMain(int id, int userId)
+        {
+            if(userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+               return Unauthorized();
+            
+            var userFormRepo = await _repo.GetUser(userId);
+
+            if(!userFormRepo.Photos.Any(p => p.Id == id))
+               return Unauthorized();
+            
+            var photoFormRepo = await _repo.GetPhoto(id);
+
+            if(photoFormRepo.IsMain)
+              return BadRequest("This Photo is already Main Photo !");
+            
+            var currentMainPhoto = await _repo.GetMainPhotoForUser(userId);
+
+            currentMainPhoto.IsMain = false;
+
+            photoFormRepo.IsMain = true;
+
+            if(await _repo.SaveAll())
+               return NoContent();
+            
+            return BadRequest("Could not set photo to main");
+        }
+
     }
 
        
