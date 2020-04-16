@@ -120,6 +120,45 @@ namespace DattingApp.API.Controllers
             return BadRequest("Could not set photo to main");
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePhoto(int userId, int id)
+        {
+             if(userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+               return Unauthorized();
+            
+            var userFormRepo = await _repo.GetUser(userId);
+
+            if(!userFormRepo.Photos.Any(p => p.Id == id))
+               return Unauthorized();
+            
+            var photoFormRepo = await _repo.GetPhoto(id);
+
+            if(photoFormRepo.IsMain)
+              return BadRequest("You can't remove your Main photo");
+
+            if(photoFormRepo.PublicId == null)
+            {
+                _repo.Delete(photoFormRepo);
+            }
+            else
+            {
+                var deletionParams = new DeletionParams(photoFormRepo.PublicId);
+                var result = _cloudinary.Destroy(deletionParams);
+                if(result.Result == "ok")
+                {
+                    _repo.Delete(photoFormRepo);
+                }
+
+                 
+            }
+
+            if(await _repo.SaveAll())
+               return Ok();
+            
+            return BadRequest("Failed to remove photo");
+
+        }
+
     }
 
        
