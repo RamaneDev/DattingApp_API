@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DattingApp.API.Data;
 using DattingApp.API.Dtos;
+using DattingApp.API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DattingApp.API.Controllers
-{
+{   [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [ApiController]
     [Route("[controller]")]
