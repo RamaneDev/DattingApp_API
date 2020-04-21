@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DattingApp.API.Helpers;
 using DattingApp.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,11 +46,13 @@ namespace DattingApp.API.Data
            return user;
         }
 
-        public async Task<IEnumerable<User>> GetUsers()
+        public async Task<PagedList<User>> GetUsers(UserParams userParams)
         {
-            var users = await _context.Users.Include(p =>p.Photos).ToListAsync();
+            var users = _context.Users.Include(p =>p.Photos);
 
-            return users;
+            var userPagedList = await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
+
+            return userPagedList;
         }
 
         public async Task<bool> SaveAll()
