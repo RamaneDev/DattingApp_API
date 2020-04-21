@@ -12,6 +12,9 @@ namespace DattingApp.API.Helpers
             get { return _pageSize ; }
             set { _pageSize = (value > MaxPageSize) ? MaxPageSize : value ; }
         }
+
+        public int UserId { get; set; }
+        public string  Gender { get; set; }
         
     }
 }

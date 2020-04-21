@@ -27,15 +27,25 @@ namespace DattingApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            var users = await _repo.GetUsers(userParams);
+            
+            var currendUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
+            var userFormRepo = await _repo.GetUser(currendUserId);
+
+            userParams.UserId = currendUserId; 
+
+            if(string.IsNullOrEmpty(userParams.Gender))
+            {
+                userParams.Gender = userFormRepo.Gender == "female"? "male":"female";
+            }          
+            
+            var users = await _repo.GetUsers(userParams);            
 
              var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
 
              HttpContext.Response.AddPagination(users.CurrentPage, 
-                          users.PageSize, users.TotalCount, users.TotalPages);         
-             
-            /* Response.AddPagination(users.CurrentPage, 
-                          users.PageSize, users.TotalCount, users.TotalPages); */
+                          users.PageSize, users.TotalCount, users.TotalPages);            
+
 
             return Ok(usersToReturn);
         }
