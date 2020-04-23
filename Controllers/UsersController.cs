@@ -6,11 +6,13 @@ using AutoMapper;
 using DattingApp.API.Data;
 using DattingApp.API.Dtos;
 using DattingApp.API.Helpers;
+using DattingApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DattingApp.API.Controllers
-{   [ServiceFilter(typeof(LogUserActivity))]
+{
+    [ServiceFilter(typeof(LogUserActivity))]
     [Authorize]
     [ApiController]
     [Route("[controller]")]
@@ -27,24 +29,24 @@ namespace DattingApp.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUsers([FromQuery]UserParams userParams)
         {
-            
+
             var currendUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
 
             var userFormRepo = await _repo.GetUser(currendUserId);
 
-            userParams.UserId = currendUserId; 
+            userParams.UserId = currendUserId;
 
-            if(string.IsNullOrEmpty(userParams.Gender))
+            if (string.IsNullOrEmpty(userParams.Gender))
             {
-                userParams.Gender = userFormRepo.Gender == "female"? "male":"female";
-            }          
-            
-            var users = await _repo.GetUsers(userParams);            
+                userParams.Gender = userFormRepo.Gender == "female" ? "male" : "female";
+            }
 
-             var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
+            var users = await _repo.GetUsers(userParams);
 
-             HttpContext.Response.AddPagination(users.CurrentPage, 
-                          users.PageSize, users.TotalCount, users.TotalPages);            
+            var usersToReturn = _mapper.Map<IEnumerable<UserForListDto>>(users);
+
+            HttpContext.Response.AddPagination(users.CurrentPage,
+                         users.PageSize, users.TotalCount, users.TotalPages);
 
 
             return Ok(usersToReturn);
@@ -64,16 +66,45 @@ namespace DattingApp.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto userForUpdateDto)
         {
-            if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
-               return Unauthorized();
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
             var userFormRepo = await _repo.GetUser(id);
 
             _mapper.Map(userForUpdateDto, userFormRepo);
 
-            if(await _repo.SaveAll())
-               return NoContent();
-            
+            if (await _repo.SaveAll())
+                return NoContent();
+
             throw new Exception($"Updating user {id} failed on save");
+        }
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recipientId)
+        {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+
+            var like = await _repo.GetLike(id, recipientId);
+
+            if (like != null)
+                return BadRequest("You already like this user");
+
+            if (await _repo.GetUser(recipientId) == null)
+                return NotFound();
+
+            like = new Like
+            {
+                LikerId = id,
+                LikeeId = recipientId
+            };
+
+            _repo.Add<Like>(like);
+
+            if (await _repo.SaveAll())
+                return Ok();
+
+            return BadRequest("Failed to like user");
+
         }
 
     }
