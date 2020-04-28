@@ -132,13 +132,13 @@ namespace DattingApp.API.Data
             switch (messageParams.MessageContainer)
             {
                 case "Inbox":
-                    messages = messages.Where(u => u.RecipientId == messageParams.UserId);
+                    messages = messages.Where(u => u.RecipientId == messageParams.UserId && u.RecipientDeleted == false);
                     break;
                 case "Outbox":
-                    messages = messages.Where(u => u.SenderId == messageParams.UserId);
+                    messages = messages.Where(u => u.SenderId == messageParams.UserId && u.SenderDeleted == false);
                     break;
                 default:
-                    messages = messages.Where(u => u.RecipientId == messageParams.UserId && u.IsRead == false);
+                    messages = messages.Where(u => u.RecipientId == messageParams.UserId && u.RecipientDeleted == false && u.IsRead == false );
                     break;
             } 
 
@@ -155,8 +155,8 @@ namespace DattingApp.API.Data
             var messages = await _context.Messages
                .Include(u => u.Sender).ThenInclude(p => p.Photos)
                .Include(u => u.Recipient).ThenInclude(p => p.Photos)
-               .Where(u => u.SenderId == userId && u.RecipientId == recipientId ||
-                       u.SenderId == recipientId && u.RecipientId == userId)
+               .Where(u => u.SenderId == userId && u.RecipientId == recipientId && u.SenderDeleted == false ||
+                       u.SenderId == recipientId && u.RecipientId == userId && u.RecipientDeleted == false )
                .OrderByDescending(m => m.MessageSent).ToListAsync();
              
              return messages;

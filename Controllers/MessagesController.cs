@@ -76,7 +76,9 @@ namespace DattingApp.API.Controllers
         [HttpPost]
         public async Task<IActionResult> GreateMessage(int userId, MessageForCreationDto messageForCreation)
         {
-              if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+              var sender = await _repo.GetUser(userId);
+              
+              if (sender.Id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
                 return Unauthorized();
             
               messageForCreation.SenderId = userId;
@@ -92,9 +94,35 @@ namespace DattingApp.API.Controllers
 
 
             if (await _repo.SaveAll())
-                return CreatedAtRoute("GetMessage", new { userId, id = message.Id }, _mapper.Map<MessageForCreationDto>(message));
+                return CreatedAtRoute("GetMessage", new { userId, id = message.Id }, _mapper.Map<MessageToReturnDto>(message));
 
             throw new Exception("Creation the message failed on save");                
+        }
+
+        [HttpPost("{id}")]
+        public async Task<IActionResult> DeleteMessage(int id, int userId)
+        {
+             if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+                return Unauthorized();
+            
+             var messageFromRepo = await _repo.GetMessage(id);
+
+             if(messageFromRepo.SenderId == userId)
+                messageFromRepo.SenderDeleted = true;
+            
+             if(messageFromRepo.RecipientId == userId)
+                messageFromRepo.RecipientDeleted = true;
+            
+             if(messageFromRepo.SenderDeleted && messageFromRepo.RecipientDeleted)
+                _repo.Delete<Message>(messageFromRepo);
+            
+            if(await _repo.SaveAll())
+               return NoContent();
+            
+            throw new Exception("Error deleting the message");
+ 
+             
+
         }
 
     }
