@@ -5,3 +5,4 @@ dating.*
 .git
 appsettings.json
 /*.cd
+wwwroot
