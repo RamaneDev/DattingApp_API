@@ -27,15 +27,20 @@ namespace DattingApp.API
 
         public void ConfigureDevelopmentServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x => x.UseSqlite(Configuration.GetConnectionString("DefaultConnectionString")));
+            services.AddDbContext<DataContext>(x => {
+             x.UseLazyLoadingProxies();
+             x.UseSqlite(Configuration.GetConnectionString("DefaultConnectionString"));   
+            });
 
             ConfigureServices(services);
         }
 
         public void ConfigureProductionServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(x => x.UseMySql(Configuration.GetConnectionString("DefaultConnectionString")));
-
+            services.AddDbContext<DataContext>(x => {
+             x.UseLazyLoadingProxies();
+             x.UseMySql(Configuration.GetConnectionString("DefaultConnectionString"));   
+            });
             ConfigureServices(services);
         }
 
