@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace DattingApp.API.Controllers
 {
     [ServiceFilter(typeof(LogUserActivity))]
-    [Authorize]
     [ApiController]
     [Route("users/{userId}/[controller]")]
     public class MessagesController : ControllerBase

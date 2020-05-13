@@ -1,8 +1,10 @@
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace DattingApp.API.Controllers
 {
+    [AllowAnonymous]
     public class Fallback : Controller
     {
        public IActionResult Index()
